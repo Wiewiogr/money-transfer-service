@@ -49,6 +49,8 @@ public class HttpRouter {
 
         post("/transfer",
                 (req, res) -> applyStatus(res, writeTransferController.recordTransfer(req)), transformer);
+        post("/transfer/deposit",
+                (req, res) -> applyStatus(res, writeTransferController.recordDeposit(req)), transformer);
 
         get("/transfer/:transferId",
                 (req, res) -> applyStatus(res, readTransferController.getTransfer(req)), transformer);

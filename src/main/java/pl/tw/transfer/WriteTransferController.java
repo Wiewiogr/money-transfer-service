@@ -58,4 +58,24 @@ public class WriteTransferController {
         transferEventBus.publish(transferRequest);
         return HttpResponse.ok(id);
     }
+
+    public HttpResponse<UUID> recordDeposit(Request req) {
+        DepositRequest depositRequest;
+        try {
+            depositRequest = gson.fromJson(req.body(), DepositRequest.class);
+        } catch (JsonSyntaxException e) {
+            LOGGER.error("Error parsing request body : " + req.body(), e);
+            return HttpResponse.error(400, "Error parsing request body.");
+        }
+
+        if (!accountRepository.accountExists(depositRequest.getTo())) {
+            return HttpResponse.error(404, "User " + depositRequest.getTo() + " not found.");
+        }
+
+        TransferRequest transferRequest = depositRequest.toTransferRequest();
+
+        UUID id = transferRepository.appendTransfer(transferRequest);
+        transferEventBus.publish(transferRequest);
+        return HttpResponse.ok(id);
+    }
 }

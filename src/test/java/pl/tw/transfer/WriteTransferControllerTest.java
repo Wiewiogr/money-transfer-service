@@ -99,8 +99,6 @@ public class WriteTransferControllerTest {
         verify(eventBus, times(1)).publish(any());
     }
 
-    private String unparsableBody = "{]sdfasjnfsdncvz";
-
     @Test
     public void shouldReturnErrorMessageWhenErrorDuringParsingOccurs() {
         //Given
@@ -117,7 +115,7 @@ public class WriteTransferControllerTest {
         );
 
         Request request = mock(Request.class);
-        when(request.body()).thenReturn(unparsableBody);
+        when(request.body()).thenReturn("{sdFsd]klfalsdk}");
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
@@ -127,10 +125,6 @@ public class WriteTransferControllerTest {
         assertThat(result.getStatus()).isEqualTo(400);
         assertThat(result.getError()).isEqualTo("Error parsing request body.");
         verify(eventBus, never()).publish(any());
-    }
-
-    private static TransferRequest createTransferRequest(BigDecimal amount, String title) {
-        return new TransferRequest(UUID.randomUUID(), UUID.randomUUID(), amount, title);
     }
 
     @Test
@@ -263,5 +257,108 @@ public class WriteTransferControllerTest {
         assertThat(result.getStatus()).isEqualTo(400);
         assertThat(result.getError()).isEqualTo("User " + transferRequest.getFrom() + " do not have enough money");
         verify(eventBus, never()).publish(any());
+    }
+
+    @Test
+    public void shouldRecordDeposit() {
+        //Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+
+        WriteTransferController writeTransferController = new WriteTransferController(
+                transferRepository,
+                accountRepository,
+                accountBalanceRepository,
+                eventBus
+        );
+
+        DepositRequest transferRequest = createDepositRequest(new BigDecimal("100.0"), "Title");
+        String jsonTransferRequest = gson.toJson(transferRequest);
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn(jsonTransferRequest);
+        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(true);
+
+        UUID transferId = UUID.randomUUID();
+        when(transferRepository.appendTransfer(transferRequest.toTransferRequest())).thenReturn(transferId);
+
+        //When
+        HttpResponse<UUID> result = writeTransferController.recordDeposit(request);
+
+        //Then
+        assertThat(result.isError()).isFalse();
+        assertThat(result.getStatus()).isEqualTo(200);
+        assertThat(result.getObject()).isEqualTo(transferId);
+        verify(eventBus, times(1)).publish(any());
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfErrorDuringParsingOccurs() {
+        //Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+
+        WriteTransferController writeTransferController = new WriteTransferController(
+                transferRepository,
+                accountRepository,
+                accountBalanceRepository,
+                eventBus
+        );
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn("{sdFsd]klfalsdk}");
+
+        //When
+        HttpResponse<UUID> result = writeTransferController.recordDeposit(request);
+
+        //Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(400);
+        assertThat(result.getError()).isEqualTo("Error parsing request body.");
+        verify(eventBus, never()).publish(any());
+    }
+
+    @Test
+    public void shouldReturnErrorWhenToAccountDoesNotExist() {
+        //Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+
+        WriteTransferController writeTransferController = new WriteTransferController(
+                transferRepository,
+                accountRepository,
+                accountBalanceRepository,
+                eventBus
+        );
+
+        DepositRequest transferRequest = createDepositRequest(new BigDecimal("100.0"), "Title");
+        String jsonTransferRequest = gson.toJson(transferRequest);
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn(jsonTransferRequest);
+        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(false);
+
+        //When
+        HttpResponse<UUID> result = writeTransferController.recordDeposit(request);
+
+        //Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(404);
+        assertThat(result.getError()).isEqualTo("User " + transferRequest.getTo() + " not found.");
+        verify(eventBus, never()).publish(any());
+    }
+
+    private static TransferRequest createTransferRequest(BigDecimal amount, String title) {
+        return new TransferRequest(UUID.randomUUID(), UUID.randomUUID(), amount, title);
+    }
+
+    private static DepositRequest createDepositRequest(BigDecimal amount, String title) {
+        return new DepositRequest(UUID.randomUUID(), amount, title);
     }
 }

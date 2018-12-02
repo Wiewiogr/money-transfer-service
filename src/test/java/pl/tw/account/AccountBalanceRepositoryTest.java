@@ -2,19 +2,21 @@ package pl.tw.account;
 
 import org.testng.annotations.Test;
 import pl.tw.eventbus.EventBus;
+import pl.tw.transfer.DepositRequest;
 import pl.tw.transfer.TransferRequest;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class AccountBalanceRepositoryTest {
 
     @Test
     public void shouldReturnZeroWhenAskingForAccountWhichTransfersWereNotRecorderYet() {
         // Given
-        EventBus<TransferRequest> eventBus = new EventBus<>();
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
 
         // When
@@ -27,7 +29,7 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldTransferMoneyBetweenAccountsWhenTheyDidNotExist() {
         // Given
-        EventBus<TransferRequest> eventBus = new EventBus<>();
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
         UUID from = UUID.randomUUID();
         UUID to = UUID.randomUUID();
@@ -48,7 +50,7 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldTransferMoneyBetweenAccountsWhenSomeOfThemExist() {
         // Given
-        EventBus<TransferRequest> eventBus = new EventBus<>();
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
@@ -69,5 +71,42 @@ public class AccountBalanceRepositoryTest {
         assertThat(firstBalance).isEqualTo(new BigDecimal("-100.0"));
         assertThat(secondBalance).isEqualTo(new BigDecimal("75.0"));
         assertThat(thirdBalance).isEqualTo(new BigDecimal("25.0"));
+    }
+
+    @Test
+    public void shouldDepositMoneyOnAccountThatDoesNotExist() {
+        // Given
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
+        UUID to = UUID.randomUUID();
+
+        DepositRequest depositRequest = new DepositRequest(to, new BigDecimal("100.0"), "Title");
+
+        // When
+        accountBalanceRepository.onTransferEvent(depositRequest.toTransferRequest());
+
+        BigDecimal balance = accountBalanceRepository.getBalance(to);
+
+        // Then
+        assertThat(balance).isEqualTo(new BigDecimal("100.0"));
+    }
+
+    @Test
+    public void shouldDepositMoneyOnAccountThatAlreadyExist() {
+        // Given
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
+        UUID to = UUID.randomUUID();
+
+        DepositRequest depositRequest = new DepositRequest(to, new BigDecimal("100.0"), "Title");
+
+        // When
+        accountBalanceRepository.onTransferEvent(depositRequest.toTransferRequest());
+        accountBalanceRepository.onTransferEvent(depositRequest.toTransferRequest());
+
+        BigDecimal balance = accountBalanceRepository.getBalance(to);
+
+        // Then
+        assertThat(balance).isEqualTo(new BigDecimal("200.0"));
     }
 }
