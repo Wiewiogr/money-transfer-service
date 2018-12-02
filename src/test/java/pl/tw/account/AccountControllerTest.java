@@ -1,7 +1,7 @@
 package pl.tw.account;
 
 import org.testng.annotations.Test;
-import pl.tw.HttpUtils;
+import pl.tw.http.HttpUtils;
 import spark.Request;
 import spark.Response;
 

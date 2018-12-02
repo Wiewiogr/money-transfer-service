@@ -2,7 +2,7 @@ package pl.tw.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
-import pl.tw.HttpUtils;
+import pl.tw.http.HttpUtils;
 import spark.Request;
 import spark.Response;
 
