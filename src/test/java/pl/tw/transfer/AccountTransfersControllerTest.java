@@ -7,7 +7,6 @@ import pl.tw.http.HttpResponse;
 import spark.Request;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -17,7 +16,7 @@ import static org.mockito.Mockito.when;
 public class AccountTransfersControllerTest {
 
     @Test
-    public void shouldReturnTransferWithParams() {
+    public void shouldReturnTransfer() {
         // Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -28,34 +27,10 @@ public class AccountTransfersControllerTest {
         Request request = mock(Request.class);
         List<Transfer> transfer = Lists.newArrayList();
         when(request.params("accountId")).thenReturn(uuid.toString());
-        when(request.queryParams("from")).thenReturn("10");
-        when(request.queryParams("to")).thenReturn("100");
+        when(request.params("from")).thenReturn("10");
+        when(request.params("to")).thenReturn("100");
         when(accountRepository.accountExists(uuid)).thenReturn(true);
-        when(transferRepository.getTransfersForAccountInTimeRange(uuid, Optional.of(10L), Optional.of(100L))).thenReturn(transfer);
-
-        // When
-        HttpResponse<List<Transfer>> result = accountController.getTransfersForAccountInTimeRange(request);
-
-        // Then
-        assertThat(result.isError()).isFalse();
-        assertThat(result.getStatus()).isEqualTo(200);
-        assertThat(result.getObject()).isEqualTo(transfer);
-    }
-
-    @Test
-    public void shouldReturnTransferWithoutParams() {
-        // Given
-        TransferRepository transferRepository = mock(TransferRepository.class);
-        AccountRepository accountRepository = mock(AccountRepository.class);
-        AccountTransfersController accountController = new AccountTransfersController(transferRepository, accountRepository);
-
-        UUID uuid = UUID.randomUUID();
-
-        Request request = mock(Request.class);
-        List<Transfer> transfer = Lists.newArrayList();
-        when(request.params("accountId")).thenReturn(uuid.toString());
-        when(accountRepository.accountExists(uuid)).thenReturn(true);
-        when(transferRepository.getTransfersForAccountInTimeRange(uuid, Optional.empty(), Optional.empty())).thenReturn(transfer);
+        when(transferRepository.getTransfersForAccountInTimeRange(uuid, 10L, 100L)).thenReturn(transfer);
 
         // When
         HttpResponse<List<Transfer>> result = accountController.getTransfersForAccountInTimeRange(request);

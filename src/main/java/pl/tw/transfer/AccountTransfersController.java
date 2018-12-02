@@ -5,7 +5,6 @@ import pl.tw.http.HttpResponse;
 import spark.Request;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class AccountTransfersController {
@@ -33,13 +32,9 @@ public class AccountTransfersController {
             return HttpResponse.error(404, "Account " + accountId + " does not exist.");
         }
 
-        Optional<Long> from = parseParam(req.queryParams("from"));
-        Optional<Long> to = parseParam(req.queryParams("to"));
+        long from = Long.valueOf(req.params("from"));
+        long to = Long.valueOf(req.params("to"));
 
         return HttpResponse.ok(transferRepository.getTransfersForAccountInTimeRange(accountId, from, to));
-    }
-
-    private Optional<Long> parseParam(String param) {
-        return param == null ? Optional.empty() : Optional.of(Long.valueOf(param));
     }
 }
