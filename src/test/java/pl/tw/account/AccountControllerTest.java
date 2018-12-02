@@ -1,15 +1,14 @@
 package pl.tw.account;
 
 import org.testng.annotations.Test;
-import pl.tw.http.ErrorMessage;
-import pl.tw.http.IdResponse;
+import pl.tw.http.HttpResponse;
 import spark.Request;
-import spark.Response;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AccountControllerTest {
 
@@ -31,15 +30,14 @@ public class AccountControllerTest {
         CreateAccountRequest createAccountRequest = new CreateAccountRequest("John", "Doe");
         when(accountRepository.createAccount(createAccountRequest)).thenReturn(uuid);
 
-        Response response = mock(Response.class);
-
         // When
-        Object result = accountController.createAccount(request, response);
+        HttpResponse<UUID> result = accountController.createAccount(request);
 
         // Then
-        verify(response).status(200);
-        assertThat(result).isInstanceOf(IdResponse.class);
-        assertThat(((IdResponse)result).getId()).isEqualTo(uuid);
+
+        assertThat(result.isError()).isFalse();
+        assertThat(result.getStatus()).isEqualTo(200);
+        assertThat(result.getObject()).isEqualTo(uuid);
     }
 
     private final String unparsableBody = "{SDADSsdf}";
@@ -53,14 +51,12 @@ public class AccountControllerTest {
         Request request = mock(Request.class);
         when(request.body()).thenReturn(unparsableBody);
 
-        Response response = mock(Response.class);
-
         // When
-        Object result = accountController.createAccount(request, response);
+        HttpResponse<UUID> result = accountController.createAccount(request);
 
         // Then
-        verify(response).status(400);
-        assertThat(result).isInstanceOf(ErrorMessage.class);
-        assertThat(((ErrorMessage) result).getError()).isEqualTo("Error parsing request body.");
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(400);
+        assertThat(result.getError()).isEqualTo("Error parsing request body.");
     }
 }
