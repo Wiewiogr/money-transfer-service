@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import pl.tw.account.AccountBalanceRepository;
 import pl.tw.account.AccountController;
 import pl.tw.account.AccountRepository;
+import pl.tw.eventbus.EventBus;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
@@ -19,13 +20,16 @@ public class WriteTransferController {
     private TransferRepository transferRepository;
     private final AccountRepository accountRepository;
     private final AccountBalanceRepository accountBalanceRepository;
+    private EventBus<TransferRequest> transferEventBus;
 
     public WriteTransferController(TransferRepository transferRepository,
                                    AccountRepository accountRepository,
-                                   AccountBalanceRepository accountBalanceRepository) {
+                                   AccountBalanceRepository accountBalanceRepository,
+                                   EventBus<TransferRequest> transferEventBus) {
         this.transferRepository = transferRepository;
         this.accountRepository = accountRepository;
         this.accountBalanceRepository = accountBalanceRepository;
+        this.transferEventBus = transferEventBus;
     }
 
     public HttpResponse<UUID> recordTransfer(Request req) {
@@ -51,6 +55,7 @@ public class WriteTransferController {
         }
 
         UUID id = transferRepository.appendTransfer(transferRequest);
+        transferEventBus.publish(transferRequest);
         return HttpResponse.ok(id);
     }
 }

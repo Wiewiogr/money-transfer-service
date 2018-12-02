@@ -6,6 +6,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import pl.tw.account.AccountBalanceRepository;
 import pl.tw.account.AccountRepository;
+import pl.tw.eventbus.EventBus;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
@@ -30,11 +31,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
@@ -56,6 +59,7 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isFalse();
         assertThat(result.getStatus()).isEqualTo(200);
         assertThat(result.getObject()).isEqualTo(transferId);
+        verify(eventBus, times(1)).publish(any());
     }
 
     @Test
@@ -64,11 +68,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
@@ -90,6 +96,7 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isFalse();
         assertThat(result.getStatus()).isEqualTo(200);
         assertThat(result.getObject()).isEqualTo(transferId);
+        verify(eventBus, times(1)).publish(any());
     }
 
     private String unparsableBody = "{]sdfasjnfsdncvz";
@@ -100,11 +107,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         Request request = mock(Request.class);
@@ -117,6 +126,7 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(400);
         assertThat(result.getError()).isEqualTo("Error parsing request body.");
+        verify(eventBus, never()).publish(any());
     }
 
     private static TransferRequest createTransferRequest(BigDecimal amount, String title) {
@@ -129,11 +139,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
@@ -150,6 +162,7 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("User " + transferRequest.getFrom() + " not found.");
+        verify(eventBus, never()).publish(any());
     }
 
     @Test
@@ -158,11 +171,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
@@ -180,6 +195,7 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("User " + transferRequest.getTo() + " not found.");
+        verify(eventBus, never()).publish(any());
     }
 
     @Test
@@ -188,11 +204,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
@@ -210,6 +228,7 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("User " + transferRequest.getFrom() + " not found.");
+        verify(eventBus, never()).publish(any());
     }
 
     @Test
@@ -218,11 +237,13 @@ public class WriteTransferControllerTest {
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<TransferRequest> eventBus = mock(EventBus.class);
 
         WriteTransferController writeTransferController = new WriteTransferController(
                 transferRepository,
                 accountRepository,
-                accountBalanceRepository
+                accountBalanceRepository,
+                eventBus
         );
 
         TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
@@ -241,5 +262,6 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(400);
         assertThat(result.getError()).isEqualTo("User " + transferRequest.getFrom() + " do not have enough money");
+        verify(eventBus, never()).publish(any());
     }
 }
