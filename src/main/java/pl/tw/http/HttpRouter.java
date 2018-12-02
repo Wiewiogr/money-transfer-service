@@ -1,6 +1,7 @@
 package pl.tw.http;
 
 import pl.tw.account.AccountController;
+import pl.tw.transfer.ReadTransferController;
 import pl.tw.transfer.WriteTransferController;
 import spark.Response;
 
@@ -11,12 +12,15 @@ public class HttpRouter {
 
     private AccountController accountController;
     private WriteTransferController writeTransferController;
+    private ReadTransferController readTransferController;
     private JsonTransformer transformer = new JsonTransformer();
 
     public HttpRouter(AccountController accountController,
-                      WriteTransferController writeTransferController) {
+                      WriteTransferController writeTransferController,
+                      ReadTransferController readTransferController) {
         this.accountController = accountController;
         this.writeTransferController = writeTransferController;
+        this.readTransferController = readTransferController;
     }
 
     public void setUpRouting() {
@@ -26,6 +30,7 @@ public class HttpRouter {
         post("/account/:accountId", (req, res) -> applyStatus(res, accountController.getAccount(req)), transformer);
 
         post("/transfer", (req, res) -> applyStatus(res, writeTransferController.recordTransfer(req)), transformer);
+        post("/transfer/:transferId", (req, res) -> applyStatus(res,readTransferController.getTransfer(req)), transformer);
     }
 
     private <T> Object applyStatus(Response response, HttpResponse<T> httpResponse) {

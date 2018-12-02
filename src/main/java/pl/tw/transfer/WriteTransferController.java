@@ -50,7 +50,7 @@ public class WriteTransferController {
             return HttpResponse.error(400, "User " + transferRequest.getFrom() + " do not have enough money");
         }
 
-        UUID id = transferRepository.recordTransfer(transferRequest);
+        UUID id = transferRepository.appendTransfer(transferRequest);
         return HttpResponse.ok(id);
     }
 }

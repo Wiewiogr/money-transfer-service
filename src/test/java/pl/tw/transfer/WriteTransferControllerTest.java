@@ -47,7 +47,7 @@ public class WriteTransferControllerTest {
         when(accountBalanceRepository.getBalance(transferRequest.getFrom())).thenReturn(new BigDecimal("200.0"));
 
         UUID transferId = UUID.randomUUID();
-        when(transferRepository.recordTransfer(transferRequest)).thenReturn(transferId);
+        when(transferRepository.appendTransfer(transferRequest)).thenReturn(transferId);
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
@@ -81,7 +81,7 @@ public class WriteTransferControllerTest {
         when(accountBalanceRepository.getBalance(transferRequest.getFrom())).thenReturn(new BigDecimal("100.0"));
 
         UUID transferId = UUID.randomUUID();
-        when(transferRepository.recordTransfer(transferRequest)).thenReturn(transferId);
+        when(transferRepository.appendTransfer(transferRequest)).thenReturn(transferId);
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
