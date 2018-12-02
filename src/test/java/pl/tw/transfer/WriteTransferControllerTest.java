@@ -2,7 +2,7 @@ package pl.tw.transfer;
 
 import com.google.gson.Gson;
 import org.testng.annotations.Test;
-import pl.tw.account.AccountBalanceRepository;
+import pl.tw.account.balance.AccountBalanceRepository;
 import pl.tw.account.AccountRepository;
 import pl.tw.eventbus.EventBus;
 import pl.tw.http.HttpResponse;

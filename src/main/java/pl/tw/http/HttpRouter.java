@@ -1,6 +1,6 @@
 package pl.tw.http;
 
-import pl.tw.account.AccountBalanceController;
+import pl.tw.account.balance.AccountBalanceController;
 import pl.tw.account.AccountController;
 import pl.tw.transfer.AccountTransfersController;
 import pl.tw.transfer.ReadTransferController;

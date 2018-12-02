@@ -3,7 +3,7 @@ package pl.tw.transfer;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.apache.log4j.Logger;
-import pl.tw.account.AccountBalanceRepository;
+import pl.tw.account.balance.AccountBalanceRepository;
 import pl.tw.account.AccountController;
 import pl.tw.account.AccountRepository;
 import pl.tw.eventbus.EventBus;
