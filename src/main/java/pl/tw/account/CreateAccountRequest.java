@@ -1,8 +1,5 @@
 package pl.tw.account;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 public class CreateAccountRequest {
@@ -10,8 +7,7 @@ public class CreateAccountRequest {
     private final String name;
     private final String surname;
 
-    @JsonCreator
-    public CreateAccountRequest(@JsonProperty("name") String name, @JsonProperty("surname") String surname) {
+    public CreateAccountRequest(String name, String surname) {
         this.name = name;
         this.surname = surname;
     }

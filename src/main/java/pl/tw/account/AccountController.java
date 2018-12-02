@@ -1,12 +1,12 @@
 package pl.tw.account;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.log4j.Logger;
 import pl.tw.http.HttpUtils;
 import spark.Request;
 import spark.Response;
 
-import java.io.IOException;
 import java.util.UUID;
 
 public class AccountController {
@@ -14,7 +14,7 @@ public class AccountController {
     private static Logger LOGGER = Logger.getLogger(AccountController.class);
 
     private final AccountRepository accountRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Gson gson = new Gson();
 
     public AccountController(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
@@ -23,8 +23,8 @@ public class AccountController {
     public String createAccount(Request req, Response res) {
         CreateAccountRequest createAccountRequest;
         try {
-            createAccountRequest = objectMapper.readValue(req.body(), CreateAccountRequest.class);
-        } catch (IOException e) {
+            createAccountRequest = gson.fromJson(req.body(), CreateAccountRequest.class);
+        } catch (JsonSyntaxException e) {
             LOGGER.error("Error parsing request body : " + res.body(), e);
 
             res.status(400);
