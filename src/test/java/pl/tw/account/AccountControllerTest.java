@@ -1,7 +1,8 @@
 package pl.tw.account;
 
 import org.testng.annotations.Test;
-import pl.tw.http.HttpUtils;
+import pl.tw.http.ErrorMessage;
+import pl.tw.http.IdResponse;
 import spark.Request;
 import spark.Response;
 
@@ -33,11 +34,12 @@ public class AccountControllerTest {
         Response response = mock(Response.class);
 
         // When
-        String result = accountController.createAccount(request, response);
+        Object result = accountController.createAccount(request, response);
 
         // Then
         verify(response).status(200);
-        assertThat(result).isEqualTo(HttpUtils.idResponse(uuid.toString()));
+        assertThat(result).isInstanceOf(IdResponse.class);
+        assertThat(((IdResponse)result).getId()).isEqualTo(uuid);
     }
 
     private final String unparsableBody = "{SDADSsdf}";
@@ -54,10 +56,11 @@ public class AccountControllerTest {
         Response response = mock(Response.class);
 
         // When
-        String result = accountController.createAccount(request, response);
+        Object result = accountController.createAccount(request, response);
 
         // Then
         verify(response).status(400);
-        assertThat(result).isEqualTo(HttpUtils.errorResponse("Error parsing request body."));
+        assertThat(result).isInstanceOf(ErrorMessage.class);
+        assertThat(((ErrorMessage) result).getError()).isEqualTo("Error parsing request body.");
     }
 }

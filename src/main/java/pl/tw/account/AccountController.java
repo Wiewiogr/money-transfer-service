@@ -3,7 +3,8 @@ package pl.tw.account;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.apache.log4j.Logger;
-import pl.tw.http.HttpUtils;
+import pl.tw.http.ErrorMessage;
+import pl.tw.http.IdResponse;
 import spark.Request;
 import spark.Response;
 
@@ -20,7 +21,7 @@ public class AccountController {
         this.accountRepository = accountRepository;
     }
 
-    public String createAccount(Request req, Response res) {
+    public Object createAccount(Request req, Response res) {
         CreateAccountRequest createAccountRequest;
         try {
             createAccountRequest = gson.fromJson(req.body(), CreateAccountRequest.class);
@@ -28,12 +29,12 @@ public class AccountController {
             LOGGER.error("Error parsing request body : " + res.body(), e);
 
             res.status(400);
-            return HttpUtils.errorResponse("Error parsing request body.");
+            return new ErrorMessage("Error parsing request body.");
         }
 
         UUID accountId = accountRepository.createAccount(createAccountRequest);
 
         res.status(200);
-        return HttpUtils.idResponse(accountId.toString());
+        return new IdResponse(accountId);
     }
 }

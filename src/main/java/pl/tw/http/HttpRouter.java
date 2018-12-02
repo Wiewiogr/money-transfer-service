@@ -20,7 +20,7 @@ public class HttpRouter {
     public void setUpRouting() {
         before((request, response) -> response.type("application/json"));
 
-        post("/account", accountController::createAccount);
+        post("/account", accountController::createAccount, new JsonTransformer());
 
         post("/transfer", writeTransferController::recordTransfer, new JsonTransformer());
     }
