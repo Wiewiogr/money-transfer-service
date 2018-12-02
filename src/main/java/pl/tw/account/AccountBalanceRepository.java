@@ -2,7 +2,7 @@ package pl.tw.account;
 
 import pl.tw.eventbus.EventBus;
 import pl.tw.transfer.DepositRequest;
-import pl.tw.transfer.TransferRequest;
+import pl.tw.transfer.Transfer;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -17,8 +17,8 @@ public class AccountBalanceRepository {
     private final Map<UUID, BigDecimal> accountBalances = new HashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    AccountBalanceRepository(EventBus<TransferRequest> transferRequestEventBus) {
-        transferRequestEventBus.subscribe(this::onTransferEvent);
+    AccountBalanceRepository(EventBus<Transfer> transferRequestEventBus) {
+        transferRequestEventBus.subscribe(this::onTransfer);
     }
 
     public BigDecimal getBalance(UUID from) {
@@ -33,13 +33,13 @@ public class AccountBalanceRepository {
         return balance == null ? BigDecimal.ZERO : balance;
     }
 
-    void onTransferEvent(TransferRequest transferRequest) {
+    void onTransfer(Transfer transfer) {
         Lock writeLock = this.lock.writeLock();
         try {
-            if (transferRequest.getFrom().equals(DepositRequest.DEPOSIT_UUID)) {
-                handleDepositRequest(transferRequest);
+            if (transfer.getFrom().equals(DepositRequest.DEPOSIT_UUID)) {
+                handleDepositRequest(transfer);
             } else {
-                handleTransferRequest(transferRequest);
+                handleTransferRequest(transfer);
             }
 
             writeLock.lock();
@@ -48,16 +48,16 @@ public class AccountBalanceRepository {
         }
     }
 
-    private void handleTransferRequest(TransferRequest transferRequest) {
-        BigDecimal fromAmount = accountBalances.computeIfAbsent(transferRequest.getFrom(), (key) -> BigDecimal.ZERO);
-        BigDecimal toAmount = accountBalances.computeIfAbsent(transferRequest.getTo(), (key) -> BigDecimal.ZERO);
+    private void handleTransferRequest(Transfer transfer) {
+        BigDecimal fromAmount = accountBalances.computeIfAbsent(transfer.getFrom(), (key) -> BigDecimal.ZERO);
+        BigDecimal toAmount = accountBalances.computeIfAbsent(transfer.getTo(), (key) -> BigDecimal.ZERO);
 
-        accountBalances.put(transferRequest.getFrom(), fromAmount.subtract(transferRequest.getAmount()));
-        accountBalances.put(transferRequest.getTo(), toAmount.add(transferRequest.getAmount()));
+        accountBalances.put(transfer.getFrom(), fromAmount.subtract(transfer.getAmount()));
+        accountBalances.put(transfer.getTo(), toAmount.add(transfer.getAmount()));
     }
 
-    private void handleDepositRequest(TransferRequest transferRequest) {
-        BigDecimal toAmount = accountBalances.computeIfAbsent(transferRequest.getTo(), (key) -> BigDecimal.ZERO);
-        accountBalances.put(transferRequest.getTo(), toAmount.add(transferRequest.getAmount()));
+    private void handleDepositRequest(Transfer transfer) {
+        BigDecimal toAmount = accountBalances.computeIfAbsent(transfer.getTo(), (key) -> BigDecimal.ZERO);
+        accountBalances.put(transfer.getTo(), toAmount.add(transfer.getAmount()));
     }
 }

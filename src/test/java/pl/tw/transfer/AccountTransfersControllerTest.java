@@ -6,6 +6,7 @@ import pl.tw.account.AccountRepository;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.when;
 public class AccountTransfersControllerTest {
 
     @Test
-    public void shouldReturnTransfer() {
+    public void shouldReturnTransfer() throws SQLException {
         // Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -80,5 +81,30 @@ public class AccountTransfersControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("Account " + uuid + " does not exist.");
+    }
+
+    @Test
+    public void shouldReturnInternalErrorWhenThereIsSqlErrorInAccountRepository() throws SQLException {
+        // Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountTransfersController accountController = new AccountTransfersController(transferRepository, accountRepository);
+
+        UUID uuid = UUID.randomUUID();
+        Request request = mock(Request.class);
+        when(request.params("accountId")).thenReturn(uuid.toString());
+        when(request.params("from")).thenReturn("10");
+        when(request.params("to")).thenReturn("100");
+        when(accountRepository.accountExists(uuid)).thenReturn(true);
+        when(transferRepository.getTransfersForAccountInTimeRange(uuid, 10L, 100L))
+                .thenThrow(SQLException.class);
+
+        // When
+        HttpResponse<List<Transfer>> result = accountController.getTransfersForAccountInTimeRange(request);
+
+        // Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
     }
 }

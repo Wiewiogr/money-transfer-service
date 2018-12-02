@@ -21,6 +21,15 @@ public class Transfer {
         this.timestamp = timestamp;
     }
 
+    public Transfer(UUID transferId, TransferRequest transferRequest, long timestamp) {
+        this.transferId = transferId;
+        this.from = transferRequest.getFrom();
+        this.to = transferRequest.getTo();
+        this.amount = transferRequest.getAmount();
+        this.title = transferRequest.getTitle();
+        this.timestamp = timestamp;
+    }
+
     public UUID getTransferId() {
         return transferId;
     }

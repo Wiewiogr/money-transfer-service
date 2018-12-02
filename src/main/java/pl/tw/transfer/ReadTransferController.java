@@ -3,6 +3,7 @@ package pl.tw.transfer;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class ReadTransferController {
@@ -22,10 +23,15 @@ public class ReadTransferController {
             return HttpResponse.error(400, transferIdParam + " is not a valid UUID.");
         }
 
-        if (!transferRepository.transferExist(transferId)) {
-            return HttpResponse.error(404, "Transfer " + transferId + " does not exist.");
+        try {
+            Transfer transfer = transferRepository.getTransfer(transferId);
+            if (transfer != null) {
+                return HttpResponse.ok(transfer);
+            } else {
+                return HttpResponse.error(404, "Transfer " + transferId + " does not exist.");
+            }
+        } catch (SQLException e) {
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
-
-        return HttpResponse.ok(transferRepository.getTransfer(transferId));
     }
 }

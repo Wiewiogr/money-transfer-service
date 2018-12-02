@@ -10,6 +10,7 @@ import pl.tw.eventbus.EventBus;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class WriteTransferController {
@@ -20,12 +21,12 @@ public class WriteTransferController {
     private TransferRepository transferRepository;
     private final AccountRepository accountRepository;
     private final AccountBalanceRepository accountBalanceRepository;
-    private EventBus<TransferRequest> transferEventBus;
+    private EventBus<Transfer> transferEventBus;
 
     public WriteTransferController(TransferRepository transferRepository,
                                    AccountRepository accountRepository,
                                    AccountBalanceRepository accountBalanceRepository,
-                                   EventBus<TransferRequest> transferEventBus) {
+                                   EventBus<Transfer> transferEventBus) {
         this.transferRepository = transferRepository;
         this.accountRepository = accountRepository;
         this.accountBalanceRepository = accountBalanceRepository;
@@ -54,9 +55,15 @@ public class WriteTransferController {
             return HttpResponse.error(400, "User " + transferRequest.getFrom() + " do not have enough money");
         }
 
-        UUID id = transferRepository.appendTransfer(transferRequest);
-        transferEventBus.publish(transferRequest);
-        return HttpResponse.ok(id);
+        Transfer transfer;
+        try {
+            transfer = transferRepository.appendTransfer(transferRequest);
+        } catch (SQLException e) {
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
+        }
+
+        transferEventBus.publish(transfer);
+        return HttpResponse.ok(transfer.getTransferId());
     }
 
     public HttpResponse<UUID> recordDeposit(Request req) {
@@ -74,8 +81,14 @@ public class WriteTransferController {
 
         TransferRequest transferRequest = depositRequest.toTransferRequest();
 
-        UUID id = transferRepository.appendTransfer(transferRequest);
-        transferEventBus.publish(transferRequest);
-        return HttpResponse.ok(id);
+        Transfer transfer;
+        try {
+            transfer = transferRepository.appendTransfer(transferRequest);
+        } catch (SQLException e) {
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
+        }
+
+        transferEventBus.publish(transfer);
+        return HttpResponse.ok(transfer.getTransferId());
     }
 }

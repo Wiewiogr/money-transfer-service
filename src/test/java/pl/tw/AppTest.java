@@ -6,7 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 
 /**
- * Unit test for simple App.
+ * Unit test for simple MoneyTransferApplication.
  */
 public class AppTest 
 {

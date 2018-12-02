@@ -3,7 +3,7 @@ package pl.tw.account;
 import org.testng.annotations.Test;
 import pl.tw.eventbus.EventBus;
 import pl.tw.transfer.DepositRequest;
-import pl.tw.transfer.TransferRequest;
+import pl.tw.transfer.Transfer;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -16,7 +16,7 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldReturnZeroWhenAskingForAccountWhichTransfersWereNotRecorderYet() {
         // Given
-        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
 
         // When
@@ -29,15 +29,15 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldTransferMoneyBetweenAccountsWhenTheyDidNotExist() {
         // Given
-        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
         UUID from = UUID.randomUUID();
         UUID to = UUID.randomUUID();
 
-        TransferRequest transferRequest = new TransferRequest(from, to, new BigDecimal("100.0"), "Title");
+        Transfer transferRequest = new Transfer(UUID.randomUUID(), from, to, new BigDecimal("100.0"), "Title", 0L);
 
         // When
-        accountBalanceRepository.onTransferEvent(transferRequest);
+        accountBalanceRepository.onTransfer(transferRequest);
 
         BigDecimal fromBalance = accountBalanceRepository.getBalance(from);
         BigDecimal toBalance = accountBalanceRepository.getBalance(to);
@@ -50,18 +50,18 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldTransferMoneyBetweenAccountsWhenSomeOfThemExist() {
         // Given
-        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
         UUID third = UUID.randomUUID();
 
-        TransferRequest transferRequest1 = new TransferRequest(first, second, new BigDecimal("100.0"), "Title");
-        TransferRequest transferRequest2 = new TransferRequest(second, third, new BigDecimal("25.0"), "Title");
+        Transfer transferRequest1 = new Transfer(UUID.randomUUID(), first, second, new BigDecimal("100.0"), "Title", 0l);
+        Transfer transferRequest2 = new Transfer(UUID.randomUUID(), second, third, new BigDecimal("25.0"), "Title", 0l);
 
         // When
-        accountBalanceRepository.onTransferEvent(transferRequest1);
-        accountBalanceRepository.onTransferEvent(transferRequest2);
+        accountBalanceRepository.onTransfer(transferRequest1);
+        accountBalanceRepository.onTransfer(transferRequest2);
 
         BigDecimal firstBalance = accountBalanceRepository.getBalance(first);
         BigDecimal secondBalance = accountBalanceRepository.getBalance(second);
@@ -76,14 +76,15 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldDepositMoneyOnAccountThatDoesNotExist() {
         // Given
-        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
         UUID to = UUID.randomUUID();
 
         DepositRequest depositRequest = new DepositRequest(to, new BigDecimal("100.0"), "Title");
+        Transfer transfer = new Transfer(UUID.randomUUID(), depositRequest.toTransferRequest(), 0L);
 
         // When
-        accountBalanceRepository.onTransferEvent(depositRequest.toTransferRequest());
+        accountBalanceRepository.onTransfer(transfer);
 
         BigDecimal balance = accountBalanceRepository.getBalance(to);
 
@@ -94,15 +95,16 @@ public class AccountBalanceRepositoryTest {
     @Test
     public void shouldDepositMoneyOnAccountThatAlreadyExist() {
         // Given
-        EventBus<TransferRequest> eventBus = mock(EventBus.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
         AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
         UUID to = UUID.randomUUID();
 
         DepositRequest depositRequest = new DepositRequest(to, new BigDecimal("100.0"), "Title");
+        Transfer transfer = new Transfer(UUID.randomUUID(), depositRequest.toTransferRequest(), 0L);
 
         // When
-        accountBalanceRepository.onTransferEvent(depositRequest.toTransferRequest());
-        accountBalanceRepository.onTransferEvent(depositRequest.toTransferRequest());
+        accountBalanceRepository.onTransfer(transfer);
+        accountBalanceRepository.onTransfer(transfer);
 
         BigDecimal balance = accountBalanceRepository.getBalance(to);
 

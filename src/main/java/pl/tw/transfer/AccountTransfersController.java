@@ -4,6 +4,7 @@ import pl.tw.account.AccountRepository;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,10 @@ public class AccountTransfersController {
         long from = Long.valueOf(req.params("from"));
         long to = Long.valueOf(req.params("to"));
 
-        return HttpResponse.ok(transferRepository.getTransfersForAccountInTimeRange(accountId, from, to));
+        try {
+            return HttpResponse.ok(transferRepository.getTransfersForAccountInTimeRange(accountId, from, to));
+        } catch (SQLException e) {
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
+        }
     }
 }
