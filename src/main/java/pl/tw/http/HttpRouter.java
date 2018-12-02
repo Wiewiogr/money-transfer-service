@@ -23,6 +23,8 @@ public class HttpRouter {
         before((request, response) -> response.type("application/json"));
 
         post("/account", (req, res) -> applyStatus(res, accountController.createAccount(req)), transformer);
+        post("/account/:accountId", (req, res) -> applyStatus(res, accountController.getAccount(req)), transformer);
+
         post("/transfer", (req, res) -> applyStatus(res, writeTransferController.recordTransfer(req)), transformer);
     }
 

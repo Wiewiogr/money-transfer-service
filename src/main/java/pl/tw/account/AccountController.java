@@ -31,4 +31,20 @@ public class AccountController {
         UUID accountId = accountRepository.createAccount(createAccountRequest);
         return HttpResponse.ok(accountId);
     }
+
+    public HttpResponse<Account> getAccount(Request req) {
+        String accountIdParam = req.params("accountId");
+        UUID accountId;
+        try {
+            accountId = UUID.fromString(accountIdParam);
+        } catch (IllegalArgumentException e) {
+            return HttpResponse.error(400, accountIdParam + " is not a valid UUID.");
+        }
+
+        if (!accountRepository.accountExists(accountId)) {
+            return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+        }
+
+        return HttpResponse.ok(accountRepository.getAccount(accountId));
+    }
 }

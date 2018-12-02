@@ -11,4 +11,8 @@ public class AccountRepository {
     public boolean accountExists(UUID from) {
         return true;
     }
+
+    public Account getAccount(UUID accountId) {
+        return null;
+    }
 }
