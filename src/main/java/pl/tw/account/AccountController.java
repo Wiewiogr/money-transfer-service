@@ -33,6 +33,7 @@ public class AccountController {
             UUID accountId = accountRepository.createAccount(createAccountRequest);
             return HttpResponse.ok(accountId);
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }
@@ -54,6 +55,7 @@ public class AccountController {
                 return HttpResponse.error(404, "Account " + accountId + " does not exist.");
             }
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }

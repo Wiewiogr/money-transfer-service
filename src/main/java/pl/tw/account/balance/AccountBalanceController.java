@@ -1,5 +1,6 @@
 package pl.tw.account.balance;
 
+import org.apache.log4j.Logger;
 import pl.tw.account.AccountRepository;
 import pl.tw.http.HttpResponse;
 import spark.Request;
@@ -9,6 +10,8 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class AccountBalanceController {
+
+    private static Logger LOGGER = Logger.getLogger(AccountBalanceController.class);
 
     private AccountBalanceRepository accountBalanceRepository;
     private AccountRepository accountRepository;
@@ -33,6 +36,7 @@ public class AccountBalanceController {
                 return HttpResponse.error(404, "Account " + accountId + " does not exist.");
             }
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
 

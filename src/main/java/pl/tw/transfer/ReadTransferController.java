@@ -1,5 +1,6 @@
 package pl.tw.transfer;
 
+import org.apache.log4j.Logger;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
@@ -7,6 +8,8 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class ReadTransferController {
+
+    private static Logger LOGGER = Logger.getLogger(ReadTransferController.class);
 
     private final TransferRepository transferRepository;
 
@@ -31,6 +34,7 @@ public class ReadTransferController {
                 return HttpResponse.error(404, "Transfer " + transferId + " does not exist.");
             }
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }

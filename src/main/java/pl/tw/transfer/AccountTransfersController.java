@@ -1,5 +1,6 @@
 package pl.tw.transfer;
 
+import org.apache.log4j.Logger;
 import pl.tw.account.AccountRepository;
 import pl.tw.http.HttpResponse;
 import spark.Request;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class AccountTransfersController {
+
+    private static Logger LOGGER = Logger.getLogger(AccountTransfersController.class);
 
     private final TransferRepository transferRepository;
     private final AccountRepository accountRepository;
@@ -39,6 +42,7 @@ public class AccountTransfersController {
 
             return HttpResponse.ok(transferRepository.getTransfersForAccountInTimeRange(accountId, from, to));
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }

@@ -60,6 +60,7 @@ public class WriteTransferController {
             transferEventBus.publish(transfer);
             return HttpResponse.ok(transfer.getTransferId());
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }
@@ -82,6 +83,7 @@ public class WriteTransferController {
             transferEventBus.publish(transfer);
             return HttpResponse.ok(transfer.getTransferId());
         } catch (SQLException e) {
+            LOGGER.error("Error accessing data from repository.", e);
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }
