@@ -163,6 +163,24 @@ public class TransferRepositoryTest extends DatabaseTestFixture {
                 .containsExactly(matchingTransfer);
     }
 
+    @Test
+    public void shouldGetAllTransfers() throws SQLException {
+        // Given
+        Transfer transfer1 = new Transfer(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), BigDecimal.ONE, "Title", 200L);
+        insertTransfer(transfer1);
+        Transfer transfer2 = new Transfer(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), BigDecimal.ONE, "Title", 100L);
+        insertTransfer(transfer2);
+        TransferRepository repository = new TransferRepository(dataSource);
+
+        // When
+        List<Transfer> result = repository.getAllTransfers();
+
+        // Then
+        assertThat(result)
+                .usingFieldByFieldElementComparator()
+                .containsExactly(transfer1, transfer2);
+    }
+
     private void insertTransfer(Transfer transfer) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("" +

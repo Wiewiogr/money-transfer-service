@@ -1,16 +1,19 @@
 package pl.tw.account.balance;
 
+import org.assertj.core.util.Lists;
 import org.testng.annotations.Test;
-import pl.tw.account.balance.AccountBalanceRepository;
 import pl.tw.eventbus.EventBus;
 import pl.tw.transfer.DepositRequest;
 import pl.tw.transfer.Transfer;
+import pl.tw.transfer.TransferRepository;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AccountBalanceRepositoryTest {
 
@@ -111,5 +114,33 @@ public class AccountBalanceRepositoryTest {
 
         // Then
         assertThat(balance).isEqualTo(new BigDecimal("200.0"));
+    }
+
+    @Test
+    public void shouldRecreateState() throws SQLException {
+        // Given
+        EventBus<Transfer> eventBus = mock(EventBus.class);
+        AccountBalanceRepository accountBalanceRepository = new AccountBalanceRepository(eventBus);
+        UUID first = UUID.randomUUID();
+        UUID second = UUID.randomUUID();
+        UUID third = UUID.randomUUID();
+
+        Transfer transfer1 = new Transfer(UUID.randomUUID(), first, second, new BigDecimal("100.0"), "Title", 0l);
+        Transfer transfer2 = new Transfer(UUID.randomUUID(), second, third, new BigDecimal("25.0"), "Title", 0l);
+
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        when(transferRepository.getAllTransfers()).thenReturn(Lists.newArrayList(transfer1, transfer2));
+
+        // When
+        accountBalanceRepository.recreateState(transferRepository);
+
+        // Then
+        BigDecimal firstBalance = accountBalanceRepository.getBalance(first);
+        BigDecimal secondBalance = accountBalanceRepository.getBalance(second);
+        BigDecimal thirdBalance = accountBalanceRepository.getBalance(third);
+
+        assertThat(firstBalance).isEqualTo(new BigDecimal("-100.0"));
+        assertThat(secondBalance).isEqualTo(new BigDecimal("75.0"));
+        assertThat(thirdBalance).isEqualTo(new BigDecimal("25.0"));
     }
 }

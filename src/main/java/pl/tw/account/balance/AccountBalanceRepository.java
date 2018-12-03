@@ -3,8 +3,10 @@ package pl.tw.account.balance;
 import pl.tw.eventbus.EventBus;
 import pl.tw.transfer.DepositRequest;
 import pl.tw.transfer.Transfer;
+import pl.tw.transfer.TransferRepository;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -19,6 +21,10 @@ public class AccountBalanceRepository {
 
     AccountBalanceRepository(EventBus<Transfer> transferRequestEventBus) {
         transferRequestEventBus.subscribe(this::onTransfer);
+    }
+
+    public void recreateState(TransferRepository transferRepository) throws SQLException {
+        transferRepository.getAllTransfers().forEach(this::onTransfer);
     }
 
     public BigDecimal getBalance(UUID from) {

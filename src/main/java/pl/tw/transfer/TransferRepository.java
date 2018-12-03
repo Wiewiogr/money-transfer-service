@@ -12,6 +12,7 @@ public class TransferRepository {
     private DataSource dataSource;
     public static final String GET_TRANSFER_SQL = "SELECT * FROM money_transfer WHERE id=?";
     public static final String GET_TRANSFERS_IN_TIME_RANGE_SQL = "SELECT * FROM money_transfer WHERE from_account=? OR to_account=? AND time BETWEEN ? AND ?";
+    public static final String GET_ALL_TRANSFERS_SQL = "SELECT * FROM money_transfer";
     public static final String APPEND_TRANSFER_SQL = "" +
             "INSERT INTO money_transfer (\n" +
             "  id,\n" +
@@ -60,9 +61,9 @@ public class TransferRepository {
     }
 
     public List<Transfer> getTransfersForAccountInTimeRange(UUID accountId, long from, long to) throws SQLException {
-
         Instant fromInstant = Instant.ofEpochMilli(from);
         Instant toInstant = Instant.ofEpochMilli(to);
+
         List<Transfer> result = new ArrayList<>();
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(GET_TRANSFERS_IN_TIME_RANGE_SQL)) {
@@ -70,6 +71,20 @@ public class TransferRepository {
                 statement.setString(2, accountId.toString());
                 statement.setTimestamp(3, Timestamp.from(fromInstant));
                 statement.setTimestamp(4, Timestamp.from(toInstant));
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    result.add(Transfer.fromResultSet(resultSet));
+                }
+            }
+        }
+        return result;
+    }
+
+    public List<Transfer> getAllTransfers() throws SQLException {
+        List<Transfer> result = new ArrayList<>();
+
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(GET_ALL_TRANSFERS_SQL)) {
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     result.add(Transfer.fromResultSet(resultSet));
