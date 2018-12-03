@@ -33,14 +33,10 @@ public class AccountTransfersController {
             if (accountRepository.getAccount(accountId) == null) {
                 return HttpResponse.error(404, "Account " + accountId + " does not exist.");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        long from = Long.valueOf(req.params("from"));
-        long to = Long.valueOf(req.params("to"));
+            long from = Long.valueOf(req.params("from"));
+            long to = Long.valueOf(req.params("to"));
 
-        try {
             return HttpResponse.ok(transferRepository.getTransfersForAccountInTimeRange(accountId, from, to));
         } catch (SQLException e) {
             return HttpResponse.error(500, "Internal server error, contact service owner.");

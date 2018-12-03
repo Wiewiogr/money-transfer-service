@@ -29,13 +29,12 @@ public class AccountController {
             return HttpResponse.error(400, "Error parsing request body.");
         }
 
-        UUID accountId = null;
         try {
-            accountId = accountRepository.createAccount(createAccountRequest);
+            UUID accountId = accountRepository.createAccount(createAccountRequest);
+            return HttpResponse.ok(accountId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
-        return HttpResponse.ok(accountId);
     }
 
     public HttpResponse<Account> getAccount(Request req) {
@@ -47,17 +46,15 @@ public class AccountController {
             return HttpResponse.error(400, accountIdParam + " is not a valid UUID.");
         }
 
-        Account account = null;
         try {
-            account = accountRepository.getAccount(accountId);
+            Account account = accountRepository.getAccount(accountId);
+            if (account != null) {
+                return HttpResponse.ok(account);
+            } else {
+                return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        if (account != null) {
-            return HttpResponse.ok(account);
-        } else {
-            return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
     }
 }

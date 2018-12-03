@@ -51,23 +51,17 @@ public class WriteTransferController {
             if (accountRepository.getAccount(transferRequest.getTo()) == null) {
                 return HttpResponse.error(404, "User " + transferRequest.getTo() + " not found.");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        if (accountBalanceRepository.getBalance(transferRequest.getFrom()).compareTo(transferRequest.getAmount()) < 0) {
-            return HttpResponse.error(400, "User " + transferRequest.getFrom() + " do not have enough money");
-        }
+            if (accountBalanceRepository.getBalance(transferRequest.getFrom()).compareTo(transferRequest.getAmount()) < 0) {
+                return HttpResponse.error(400, "User " + transferRequest.getFrom() + " do not have enough money");
+            }
 
-        Transfer transfer;
-        try {
-            transfer = transferRepository.appendTransfer(transferRequest);
+            Transfer transfer = transferRepository.appendTransfer(transferRequest);
+            transferEventBus.publish(transfer);
+            return HttpResponse.ok(transfer.getTransferId());
         } catch (SQLException e) {
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
-
-        transferEventBus.publish(transfer);
-        return HttpResponse.ok(transfer.getTransferId());
     }
 
     public HttpResponse<UUID> recordDeposit(Request req) {
@@ -83,20 +77,12 @@ public class WriteTransferController {
             if (accountRepository.getAccount(depositRequest.getTo()) == null) {
                 return HttpResponse.error(404, "User " + depositRequest.getTo() + " not found.");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        TransferRequest transferRequest = depositRequest.toTransferRequest();
-
-        Transfer transfer;
-        try {
-            transfer = transferRepository.appendTransfer(transferRequest);
+            Transfer transfer = transferRepository.appendTransfer(depositRequest.toTransferRequest());
+            transferEventBus.publish(transfer);
+            return HttpResponse.ok(transfer.getTransferId());
         } catch (SQLException e) {
             return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
-
-        transferEventBus.publish(transfer);
-        return HttpResponse.ok(transfer.getTransferId());
     }
 }

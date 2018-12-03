@@ -293,6 +293,75 @@ public class WriteTransferControllerTest {
     }
 
     @Test
+    public void shouldReturnInternalServerWhenSqlErrorOccursWhileGettingFromAccount() throws SQLException {
+        //Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
+
+        WriteTransferController writeTransferController = new WriteTransferController(
+                transferRepository,
+                accountRepository,
+                accountBalanceRepository,
+                eventBus
+        );
+
+        TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
+        String jsonTransferRequest = gson.toJson(transferRequest);
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn(jsonTransferRequest);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenThrow(SQLException.class);
+
+        when(transferRepository.appendTransfer(transferRequest)).thenThrow(SQLException.class);
+
+        //When
+        HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
+
+        //Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
+        verify(eventBus, never()).publish(any());
+    }
+
+    @Test
+    public void shouldReturnInternalServerWhenSqlErrorOccursWhileGettingToAccount() throws SQLException {
+        //Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
+
+        WriteTransferController writeTransferController = new WriteTransferController(
+                transferRepository,
+                accountRepository,
+                accountBalanceRepository,
+                eventBus
+        );
+
+        TransferRequest transferRequest = createTransferRequest(new BigDecimal("100.0"), "Title");
+        String jsonTransferRequest = gson.toJson(transferRequest);
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn(jsonTransferRequest);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(mock(Account.class));
+        when(accountRepository.getAccount(transferRequest.getTo())).thenThrow(SQLException.class);
+
+        when(transferRepository.appendTransfer(transferRequest)).thenThrow(SQLException.class);
+
+        //When
+        HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
+
+        //Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
+        verify(eventBus, never()).publish(any());
+    }
+
+    @Test
     public void shouldRecordDeposit() throws SQLException {
         //Given
         TransferRepository transferRepository = mock(TransferRepository.class);
@@ -385,6 +454,38 @@ public class WriteTransferControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("User " + depositRequest.getTo() + " not found.");
+        verify(eventBus, never()).publish(any());
+    }
+
+    @Test
+    public void shouldReturnInternalErrorWhenSqlErrorOccursWhileGettingAccount() throws SQLException {
+        //Given
+        TransferRepository transferRepository = mock(TransferRepository.class);
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        EventBus<Transfer> eventBus = mock(EventBus.class);
+
+        WriteTransferController writeTransferController = new WriteTransferController(
+                transferRepository,
+                accountRepository,
+                accountBalanceRepository,
+                eventBus
+        );
+
+        DepositRequest depositRequest = createDepositRequest(new BigDecimal("100.0"), "Title");
+        String jsonTransferRequest = gson.toJson(depositRequest);
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn(jsonTransferRequest);
+        when(accountRepository.getAccount(depositRequest.getTo())).thenThrow(SQLException.class);
+
+        //When
+        HttpResponse<UUID> result = writeTransferController.recordDeposit(request);
+
+        //Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
         verify(eventBus, never()).publish(any());
     }
 

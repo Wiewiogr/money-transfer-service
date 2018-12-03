@@ -41,6 +41,26 @@ public class AccountControllerTest {
         assertThat(result.getObject()).isEqualTo(uuid);
     }
 
+    @Test
+    public void shouldReturnInternalErrorWhenSqlErrorOccursWhileCreatingAccount() throws SQLException {
+        // Given
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountController accountController = new AccountController(accountRepository);
+
+        Request request = mock(Request.class);
+        when(request.body()).thenReturn(correctBody);
+        CreateAccountRequest createAccountRequest = new CreateAccountRequest("John", "Doe");
+        when(accountRepository.createAccount(createAccountRequest)).thenThrow(SQLException.class);
+
+        // When
+        HttpResponse<UUID> result = accountController.createAccount(request);
+
+        // Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
+    }
+
     private final String unparsableBody = "{SDADSsdf}";
 
     @Test
@@ -119,5 +139,25 @@ public class AccountControllerTest {
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("Account " + uuid + " does not exist.");
+    }
+
+    @Test
+    public void shouldReturnInternalErrorWhenSqlExceptionOccursWhileGetAccount() throws SQLException {
+        // Given
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountController accountController = new AccountController(accountRepository);
+
+        UUID uuid = UUID.randomUUID();
+        Request request = mock(Request.class);
+        when(request.params("accountId")).thenReturn(uuid.toString());
+        when(accountRepository.getAccount(uuid)).thenThrow(SQLException.class);
+
+        // When
+        HttpResponse<Account> result = accountController.getAccount(request);
+
+        // Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
     }
 }

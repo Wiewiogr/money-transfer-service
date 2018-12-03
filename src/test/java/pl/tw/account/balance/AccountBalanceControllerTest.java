@@ -83,4 +83,26 @@ public class AccountBalanceControllerTest {
         assertThat(result.getStatus()).isEqualTo(404);
         assertThat(result.getError()).isEqualTo("Account " + uuid + " does not exist.");
     }
+
+    @Test
+    public void shouldReturnInternalServerErrorWhenSqlOccursDuringGetAccount() throws SQLException {
+        // Given
+        AccountRepository accountRepository = mock(AccountRepository.class);
+        AccountBalanceRepository accountBalanceRepository = mock(AccountBalanceRepository.class);
+        AccountBalanceController accountBalanceController =
+                new AccountBalanceController(accountBalanceRepository, accountRepository);
+
+        UUID uuid = UUID.randomUUID();
+        Request request = mock(Request.class);
+        when(request.params("accountId")).thenReturn(uuid.toString());
+        when(accountRepository.getAccount(uuid)).thenThrow(SQLException.class);
+
+        // When
+        HttpResponse<BigDecimal> result = accountBalanceController.getBalance(request);
+
+        // Then
+        assertThat(result.isError()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(500);
+        assertThat(result.getError()).isEqualTo("Internal server error, contact service owner.");
+    }
 }

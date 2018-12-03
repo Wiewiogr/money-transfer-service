@@ -33,7 +33,7 @@ public class AccountBalanceController {
                 return HttpResponse.error(404, "Account " + accountId + " does not exist.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            return HttpResponse.error(500, "Internal server error, contact service owner.");
         }
 
         return HttpResponse.ok(accountBalanceRepository.getBalance(accountId));
