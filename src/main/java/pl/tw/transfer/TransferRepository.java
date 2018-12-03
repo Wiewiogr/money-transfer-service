@@ -1,7 +1,6 @@
 package pl.tw.transfer;
 
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class TransferRepository {
                 statement.setString(1, transferId.toString());
                 ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    return resultSetToTransfer(resultSet);
+                    return Transfer.fromResultSet(resultSet);
                 } else {
                     return null;
                 }
@@ -73,20 +72,10 @@ public class TransferRepository {
                 statement.setTimestamp(4, Timestamp.from(toInstant));
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    result.add(resultSetToTransfer(resultSet));
+                    result.add(Transfer.fromResultSet(resultSet));
                 }
             }
         }
         return result;
-    }
-
-    private Transfer resultSetToTransfer(ResultSet resultSet) throws SQLException {
-        UUID id = UUID.fromString(resultSet.getString(1));
-        UUID from = UUID.fromString(resultSet.getString(2));
-        UUID to = UUID.fromString(resultSet.getString(3));
-        BigDecimal amount = resultSet.getBigDecimal(4);
-        String title = resultSet.getString(5);
-        long timestamp = resultSet.getTimestamp(6).getTime();
-        return new Transfer(id, from, to, amount, title, timestamp);
     }
 }

@@ -1,6 +1,8 @@
 package pl.tw.transfer;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class Transfer {
@@ -52,5 +54,15 @@ public class Transfer {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public static Transfer fromResultSet(ResultSet resultSet) throws SQLException {
+        UUID id = UUID.fromString(resultSet.getString(1));
+        UUID from = UUID.fromString(resultSet.getString(2));
+        UUID to = UUID.fromString(resultSet.getString(3));
+        BigDecimal amount = resultSet.getBigDecimal(4);
+        String title = resultSet.getString(5);
+        long timestamp = resultSet.getTimestamp(6).getTime();
+        return new Transfer(id, from, to, amount, title, timestamp);
     }
 }
