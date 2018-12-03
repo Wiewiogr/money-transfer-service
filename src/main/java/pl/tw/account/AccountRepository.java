@@ -19,7 +19,7 @@ public class AccountRepository {
 
     private DataSource dataSource;
 
-    AccountRepository(DataSource dataSource) {
+    public AccountRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

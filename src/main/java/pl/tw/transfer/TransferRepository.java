@@ -23,7 +23,7 @@ public class TransferRepository {
             "  time\n" +
             ") VALUES (?, ?, ?, ?, ?, ?)";
 
-    TransferRepository(DataSource dataSource) {
+    public TransferRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

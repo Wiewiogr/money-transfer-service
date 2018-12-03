@@ -11,10 +11,10 @@ import java.util.Scanner;
 
 public class DatabaseConfiguration {
 
-    public static final String USER = "app";
-    public static final String PASSWORD = "app";
-    public static final String DRIVER_CLASS_NAME = "org.hsqldb.jdbc.JDBCDriver";
-    public static final String DATABASE_URL = "jdbc:hsqldb:mem:app;";
+    private static final String USER = "app";
+    private static final String PASSWORD = "app";
+    private static final String DRIVER_CLASS_NAME = "org.hsqldb.jdbc.JDBCDriver";
+    private static final String DATABASE_URL = "jdbc:hsqldb:mem:app;";
 
     public DataSource getDataSource() throws SQLException {
         BasicDataSource dataSource = new BasicDataSource();

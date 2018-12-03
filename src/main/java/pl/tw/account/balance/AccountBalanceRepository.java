@@ -19,7 +19,7 @@ public class AccountBalanceRepository {
     private final Map<UUID, BigDecimal> accountBalances = new HashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    AccountBalanceRepository(EventBus<Transfer> transferRequestEventBus) {
+    public AccountBalanceRepository(EventBus<Transfer> transferRequestEventBus) {
         transferRequestEventBus.subscribe(this::onTransfer);
     }
 
