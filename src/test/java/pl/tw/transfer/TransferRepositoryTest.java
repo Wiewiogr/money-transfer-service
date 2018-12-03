@@ -1,11 +1,8 @@
 package pl.tw.transfer;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import pl.tw.sql.DatabaseConfiguration;
+import pl.tw.util.DatabaseTestFixture;
 
-import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.Instant;
@@ -14,24 +11,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TransferRepositoryTest {
-
-    DataSource dataSource;
-    DatabaseConfiguration databaseConfiguration = new DatabaseConfiguration();
-
-    @BeforeMethod
-    public void setUp() throws SQLException {
-        dataSource = databaseConfiguration.getDataSource();
-    }
-
-    @AfterMethod
-    public void clean() throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("DROP TABLE money_transfer");
-            }
-        }
-    }
+public class TransferRepositoryTest extends DatabaseTestFixture {
 
     @Test
     public void shouldAppendTransfer() throws SQLException {

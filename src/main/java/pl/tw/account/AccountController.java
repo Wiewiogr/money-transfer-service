@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class AccountController {
@@ -28,7 +29,12 @@ public class AccountController {
             return HttpResponse.error(400, "Error parsing request body.");
         }
 
-        UUID accountId = accountRepository.createAccount(createAccountRequest);
+        UUID accountId = null;
+        try {
+            accountId = accountRepository.createAccount(createAccountRequest);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return HttpResponse.ok(accountId);
     }
 
@@ -41,10 +47,17 @@ public class AccountController {
             return HttpResponse.error(400, accountIdParam + " is not a valid UUID.");
         }
 
-        if (!accountRepository.accountExists(accountId)) {
-            return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+        Account account = null;
+        try {
+            account = accountRepository.getAccount(accountId);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        return HttpResponse.ok(accountRepository.getAccount(accountId));
+        if (account != null) {
+            return HttpResponse.ok(account);
+        } else {
+            return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+        }
     }
 }

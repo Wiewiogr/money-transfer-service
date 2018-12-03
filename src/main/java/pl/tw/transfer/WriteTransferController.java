@@ -43,12 +43,16 @@ public class WriteTransferController {
             return HttpResponse.error(400, "Error parsing request body.");
         }
 
-        if (!accountRepository.accountExists(transferRequest.getFrom())) {
-            return HttpResponse.error(404, "User " + transferRequest.getFrom() + " not found.");
-        }
+        try {
+            if (accountRepository.getAccount(transferRequest.getFrom()) == null) {
+                return HttpResponse.error(404, "User " + transferRequest.getFrom() + " not found.");
+            }
 
-        if (!accountRepository.accountExists(transferRequest.getTo())) {
-            return HttpResponse.error(404, "User " + transferRequest.getTo() + " not found.");
+            if (accountRepository.getAccount(transferRequest.getTo()) == null) {
+                return HttpResponse.error(404, "User " + transferRequest.getTo() + " not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         if (accountBalanceRepository.getBalance(transferRequest.getFrom()).compareTo(transferRequest.getAmount()) < 0) {
@@ -75,8 +79,12 @@ public class WriteTransferController {
             return HttpResponse.error(400, "Error parsing request body.");
         }
 
-        if (!accountRepository.accountExists(depositRequest.getTo())) {
-            return HttpResponse.error(404, "User " + depositRequest.getTo() + " not found.");
+        try {
+            if (accountRepository.getAccount(depositRequest.getTo()) == null) {
+                return HttpResponse.error(404, "User " + depositRequest.getTo() + " not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         TransferRequest transferRequest = depositRequest.toTransferRequest();

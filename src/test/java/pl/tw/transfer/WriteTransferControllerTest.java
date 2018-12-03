@@ -2,6 +2,7 @@ package pl.tw.transfer;
 
 import com.google.gson.Gson;
 import org.testng.annotations.Test;
+import pl.tw.account.Account;
 import pl.tw.account.balance.AccountBalanceRepository;
 import pl.tw.account.AccountRepository;
 import pl.tw.eventbus.EventBus;
@@ -39,8 +40,8 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(true);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(true);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(mock(Account.class));
+        when(accountRepository.getAccount(transferRequest.getTo())).thenReturn(mock(Account.class));
         when(accountBalanceRepository.getBalance(transferRequest.getFrom())).thenReturn(new BigDecimal("200.0"));
 
         UUID transferId = UUID.randomUUID();
@@ -77,8 +78,8 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(true);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(true);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(mock(Account.class));
+        when(accountRepository.getAccount(transferRequest.getTo())).thenReturn(mock(Account.class));
         when(accountBalanceRepository.getBalance(transferRequest.getFrom())).thenReturn(new BigDecimal("100.0"));
 
         UUID transferId = UUID.randomUUID();
@@ -124,7 +125,7 @@ public class WriteTransferControllerTest {
     }
 
     @Test
-    public void shouldReturnNotFoundWhenFromUserWasNotFound() {
+    public void shouldReturnNotFoundWhenFromUserWasNotFound() throws SQLException {
         //Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -143,7 +144,7 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(false);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(null);
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
@@ -156,7 +157,7 @@ public class WriteTransferControllerTest {
     }
 
     @Test
-    public void shouldReturnNotFoundWhenToUserWasNotFound() {
+    public void shouldReturnNotFoundWhenToUserWasNotFound() throws SQLException {
         //Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -175,8 +176,8 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(true);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(false);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(mock(Account.class));
+        when(accountRepository.getAccount(transferRequest.getTo())).thenReturn(null);
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
@@ -189,7 +190,7 @@ public class WriteTransferControllerTest {
     }
 
     @Test
-    public void shouldReturnNotFoundWhenBothUsersWhereNotFound() {
+    public void shouldReturnNotFoundWhenBothUsersWhereNotFound() throws SQLException {
         //Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -208,8 +209,8 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(false);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(false);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(null);
+        when(accountRepository.getAccount(transferRequest.getTo())).thenReturn(null);
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordTransfer(request);
@@ -222,7 +223,7 @@ public class WriteTransferControllerTest {
     }
 
     @Test
-    public void shouldReturnBadRequestWhenDoesNotHaveEnoughMoney() {
+    public void shouldReturnBadRequestWhenDoesNotHaveEnoughMoney() throws SQLException {
         //Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -241,8 +242,8 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(true);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(true);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(mock(Account.class));
+        when(accountRepository.getAccount(transferRequest.getTo())).thenReturn(mock(Account.class));
         when(accountBalanceRepository.getBalance(transferRequest.getFrom())).thenReturn(new BigDecimal("50.0"));
 
         //When
@@ -275,8 +276,8 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getFrom())).thenReturn(true);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(true);
+        when(accountRepository.getAccount(transferRequest.getFrom())).thenReturn(mock(Account.class));
+        when(accountRepository.getAccount(transferRequest.getTo())).thenReturn(mock(Account.class));
         when(accountBalanceRepository.getBalance(transferRequest.getFrom())).thenReturn(new BigDecimal("200.0"));
 
         when(transferRepository.appendTransfer(transferRequest)).thenThrow(SQLException.class);
@@ -311,7 +312,7 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(depositRequest.getTo())).thenReturn(true);
+        when(accountRepository.getAccount(depositRequest.getTo())).thenReturn(mock(Account.class));
 
         UUID transferId = UUID.randomUUID();
         when(transferRepository.appendTransfer(depositRequest.toTransferRequest()))
@@ -356,7 +357,7 @@ public class WriteTransferControllerTest {
     }
 
     @Test
-    public void shouldReturnErrorWhenToAccountDoesNotExist() {
+    public void shouldReturnErrorWhenToAccountDoesNotExist() throws SQLException {
         //Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -370,12 +371,12 @@ public class WriteTransferControllerTest {
                 eventBus
         );
 
-        DepositRequest transferRequest = createDepositRequest(new BigDecimal("100.0"), "Title");
-        String jsonTransferRequest = gson.toJson(transferRequest);
+        DepositRequest depositRequest = createDepositRequest(new BigDecimal("100.0"), "Title");
+        String jsonTransferRequest = gson.toJson(depositRequest);
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(transferRequest.getTo())).thenReturn(false);
+        when(accountRepository.getAccount(depositRequest.getTo())).thenReturn(null);
 
         //When
         HttpResponse<UUID> result = writeTransferController.recordDeposit(request);
@@ -383,7 +384,7 @@ public class WriteTransferControllerTest {
         //Then
         assertThat(result.isError()).isTrue();
         assertThat(result.getStatus()).isEqualTo(404);
-        assertThat(result.getError()).isEqualTo("User " + transferRequest.getTo() + " not found.");
+        assertThat(result.getError()).isEqualTo("User " + depositRequest.getTo() + " not found.");
         verify(eventBus, never()).publish(any());
     }
 
@@ -407,7 +408,7 @@ public class WriteTransferControllerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn(jsonTransferRequest);
-        when(accountRepository.accountExists(depositRequest.getTo())).thenReturn(true);
+        when(accountRepository.getAccount(depositRequest.getTo())).thenReturn(mock(Account.class));
         when(transferRepository.appendTransfer(depositRequest.toTransferRequest()))
                 .thenThrow(SQLException.class);
 

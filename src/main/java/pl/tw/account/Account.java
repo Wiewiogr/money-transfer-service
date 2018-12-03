@@ -1,5 +1,7 @@
 package pl.tw.account;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class Account {
@@ -25,5 +27,12 @@ public class Account {
 
     public String getSurname() {
         return surname;
+    }
+
+    public static Account fromResultSet(ResultSet resultSet) throws SQLException {
+        UUID id = UUID.fromString(resultSet.getString(1));
+        String name = resultSet.getString(2);
+        String surname = resultSet.getString(3);
+        return new Account(id, name, surname);
     }
 }

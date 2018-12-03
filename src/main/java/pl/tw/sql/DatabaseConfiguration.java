@@ -25,6 +25,8 @@ public class DatabaseConfiguration {
         dataSource.setDefaultAutoCommit(true);
 
         executeSqlFile(dataSource, "sql/init_transfers_table.sql");
+        executeSqlFile(dataSource, "sql/init_account_table.sql");
+
         return dataSource;
     }
 

@@ -5,6 +5,7 @@ import pl.tw.http.HttpResponse;
 import spark.Request;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class AccountBalanceController {
@@ -27,8 +28,12 @@ public class AccountBalanceController {
             return HttpResponse.error(400, accountIdParam + " is not a valid UUID.");
         }
 
-        if (!accountRepository.accountExists(accountId)) {
-            return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+        try {
+            if (accountRepository.getAccount(accountId) == null) {
+                return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return HttpResponse.ok(accountBalanceRepository.getBalance(accountId));

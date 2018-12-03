@@ -4,6 +4,7 @@ import org.testng.annotations.Test;
 import pl.tw.http.HttpResponse;
 import spark.Request;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -19,7 +20,7 @@ public class AccountControllerTest {
             "}";
 
     @Test
-    public void shouldReturnIdOfNewlyCreatedAccount() {
+    public void shouldReturnIdOfNewlyCreatedAccount() throws SQLException {
         // Given
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountController accountController = new AccountController(accountRepository);
@@ -61,7 +62,7 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void shouldReturnAccount() {
+    public void shouldReturnAccount() throws SQLException {
         // Given
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountController accountController = new AccountController(accountRepository);
@@ -70,7 +71,6 @@ public class AccountControllerTest {
         Request request = mock(Request.class);
         Account account = new Account(uuid, "Name", "Surname");
         when(request.params("accountId")).thenReturn(uuid.toString());
-        when(accountRepository.accountExists(uuid)).thenReturn(true);
         when(accountRepository.getAccount(uuid)).thenReturn(account);
 
         // When
@@ -102,7 +102,7 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void shouldReturnErrorWhenAccountDoesNotExists() {
+    public void shouldReturnErrorWhenAccountDoesNotExists() throws SQLException {
         // Given
         AccountRepository accountRepository = mock(AccountRepository.class);
         AccountController accountController = new AccountController(accountRepository);
@@ -110,7 +110,7 @@ public class AccountControllerTest {
         UUID uuid = UUID.randomUUID();
         Request request = mock(Request.class);
         when(request.params("accountId")).thenReturn(uuid.toString());
-        when(accountRepository.accountExists(uuid)).thenReturn(false);
+        when(accountRepository.getAccount(uuid)).thenReturn(null);
 
         // When
         HttpResponse<Account> result = accountController.getAccount(request);

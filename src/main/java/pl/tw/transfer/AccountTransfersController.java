@@ -29,8 +29,12 @@ public class AccountTransfersController {
             return HttpResponse.error(400, accountIdParam + " is not a valid UUID.");
         }
 
-        if (!accountRepository.accountExists(accountId)) {
-            return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+        try {
+            if (accountRepository.getAccount(accountId) == null) {
+                return HttpResponse.error(404, "Account " + accountId + " does not exist.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         long from = Long.valueOf(req.params("from"));

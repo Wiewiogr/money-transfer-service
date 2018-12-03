@@ -2,6 +2,7 @@ package pl.tw.transfer;
 
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
+import pl.tw.account.Account;
 import pl.tw.account.AccountRepository;
 import pl.tw.http.HttpResponse;
 import spark.Request;
@@ -30,7 +31,7 @@ public class AccountTransfersControllerTest {
         when(request.params("accountId")).thenReturn(uuid.toString());
         when(request.params("from")).thenReturn("10");
         when(request.params("to")).thenReturn("100");
-        when(accountRepository.accountExists(uuid)).thenReturn(true);
+        when(accountRepository.getAccount(uuid)).thenReturn(mock(Account.class));
         when(transferRepository.getTransfersForAccountInTimeRange(uuid, 10L, 100L)).thenReturn(transfer);
 
         // When
@@ -62,7 +63,7 @@ public class AccountTransfersControllerTest {
     }
 
     @Test
-    public void shouldReturnErrorWhenTransferDoesNotExists() {
+    public void shouldReturnErrorWhenTransferDoesNotExists() throws SQLException {
         // Given
         TransferRepository transferRepository = mock(TransferRepository.class);
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -72,7 +73,7 @@ public class AccountTransfersControllerTest {
 
         Request request = mock(Request.class);
         when(request.params("accountId")).thenReturn(uuid.toString());
-        when(accountRepository.accountExists(uuid)).thenReturn(false);
+        when(accountRepository.getAccount(uuid)).thenReturn(null);
 
         // When
         HttpResponse<List<Transfer>> result = accountController.getTransfersForAccountInTimeRange(request);
@@ -95,7 +96,7 @@ public class AccountTransfersControllerTest {
         when(request.params("accountId")).thenReturn(uuid.toString());
         when(request.params("from")).thenReturn("10");
         when(request.params("to")).thenReturn("100");
-        when(accountRepository.accountExists(uuid)).thenReturn(true);
+        when(accountRepository.getAccount(uuid)).thenReturn(mock(Account.class));
         when(transferRepository.getTransfersForAccountInTimeRange(uuid, 10L, 100L))
                 .thenThrow(SQLException.class);
 
