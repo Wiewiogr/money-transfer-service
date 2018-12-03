@@ -19,7 +19,7 @@ public class DatabaseTestFixture {
         dataSource = databaseConfiguration.getDataSource();
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void clean() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             try (Statement statement = connection.createStatement()) {
@@ -30,5 +30,4 @@ public class DatabaseTestFixture {
             }
         }
     }
-
 }
