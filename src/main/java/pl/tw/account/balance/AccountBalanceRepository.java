@@ -31,8 +31,8 @@ public class AccountBalanceRepository {
         Lock readLock = this.lock.writeLock();
         BigDecimal balance;
         try {
-            balance = accountBalances.get(from);
             readLock.lock();
+            balance = accountBalances.get(from);
         } finally {
             readLock.unlock();
         }
@@ -42,13 +42,12 @@ public class AccountBalanceRepository {
     void onTransfer(Transfer transfer) {
         Lock writeLock = this.lock.writeLock();
         try {
+            writeLock.lock();
             if (transfer.getFrom().equals(DepositRequest.DEPOSIT_UUID)) {
                 handleDepositRequest(transfer);
             } else {
                 handleTransferRequest(transfer);
             }
-
-            writeLock.lock();
         } finally {
             writeLock.unlock();
         }
