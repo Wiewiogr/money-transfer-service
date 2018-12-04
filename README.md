@@ -12,7 +12,7 @@
 
 ```GET /account/{accountId}/balance``` get account balance
 
-```GET /account/{accountId}/{from}/{to}``` get account's money transfers in specified time range
+```GET /account/{accountId}/transfer/{from}/{to}``` get account's money transfers in specified time range
 
 ```POST /transfer``` transfer money between accounts, example request's body:
 ```

@@ -46,7 +46,7 @@ public class HttpRouter {
         http.get("/account/:accountId/balance",
                 (req, res) -> applyStatus(res, accountBalanceController.getBalance(req)), transformer);
 
-        http.get("/account/:accountId/:from/:to",
+        http.get("/account/:accountId/transfer/:from/:to",
                 (req, res) -> applyStatus(res, accountTransfersController.getTransfersForAccountInTimeRange(req)), transformer);
 
         http.post("/transfer",

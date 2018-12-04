@@ -1,5 +1,6 @@
 package pl.tw.integration;
 
+import org.apache.http.client.HttpResponseException;
 import org.testng.annotations.Test;
 import pl.tw.account.CreateAccountRequest;
 import pl.tw.transfer.DepositRequest;
@@ -50,5 +51,32 @@ public class AccountBalanceItTest extends IntegrationTestFixture {
 
         assertThat(firstBalance).isEqualTo(new BigDecimal("700"));
         assertThat(secondBalance).isEqualTo(new BigDecimal("300"));
+    }
+
+    @Test
+    public void shouldAllowTransferOnlyWhenThereIsEnoughMoney() throws Exception {
+        // Given
+        CreateAccountRequest createAccountRequest1 = new CreateAccountRequest("John", "Doe");
+        CreateAccountRequest createAccountRequest2 = new CreateAccountRequest("Jane", "Smith");
+        UUID first = post("http://localhost:" + currentPort + "/account", createAccountRequest1);
+        UUID second = post("http://localhost:" + currentPort + "/account", createAccountRequest2);
+
+        DepositRequest depositRequest = new DepositRequest(first, new BigDecimal("1000"), "Deposit");
+        post("http://localhost:" + currentPort + "/transfer/deposit", depositRequest);
+
+        // When
+        TransferRequest transferRequest = new TransferRequest(first, second, new BigDecimal("3000"), "Title");
+
+        HttpResponseException responseException = null;
+        try {
+            post("http://localhost:" + currentPort + "/transfer", transferRequest);
+        } catch (HttpResponseException e) {
+            responseException = e;
+        }
+
+        // Then
+        assertThat(responseException).isNotNull();
+        assertThat(responseException).hasMessage("Bad Request");
+        assertThat(responseException.getStatusCode()).isEqualTo(400);
     }
 }
