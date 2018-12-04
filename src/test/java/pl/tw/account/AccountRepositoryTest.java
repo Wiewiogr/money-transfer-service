@@ -60,20 +60,4 @@ public class AccountRepositoryTest extends DatabaseTestFixture {
         Account expected = new Account(result, "John", "Doe");
         assertThat(actual).isEqualToComparingFieldByField(expected);
     }
-
-    private void insertAccount(Account account) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("" +
-                    "INSERT INTO account(\n" +
-                    "    id,\n" +
-                    "    name,\n" +
-                    "    surname\n" +
-                    ") VALUES(?, ?, ?)")) {
-                statement.setString(1, account.getId().toString());
-                statement.setString(2, account.getName());
-                statement.setString(3, account.getSurname());
-                statement.execute();
-            }
-        }
-    }
 }

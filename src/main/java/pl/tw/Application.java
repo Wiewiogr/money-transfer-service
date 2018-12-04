@@ -9,12 +9,9 @@ import pl.tw.eventbus.EventBus;
 import pl.tw.http.HttpRouter;
 import pl.tw.sql.DatabaseConfiguration;
 import pl.tw.transfer.*;
-import spark.Spark;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-
-import static spark.Spark.port;
 
 public class Application {
 
@@ -42,15 +39,14 @@ public class Application {
                 new AccountTransfersController(transferRepository, accountRepository);
 
         router = new HttpRouter(accountController, writeTransferController, readTransferController, accountTransfersController, accountBalanceController);
-        port(8080);
     }
 
-    public void start() {
-        router.setUpRouting();
+    public void start(int port) {
+        router.setUpRouting(port);
     }
 
     public void stop() {
-        Spark.stop();
+        router.stop();
     }
 
     public static void main(String[] args) throws SQLException {
@@ -58,6 +54,6 @@ public class Application {
         DataSource dataSource = databaseConfiguration.getDataSource();
 
         Application application = new Application(dataSource);
-        application.start();
+        application.start(8080);
     }
 }

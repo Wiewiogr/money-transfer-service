@@ -5,7 +5,6 @@ import pl.tw.util.DatabaseTestFixture;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -179,27 +178,5 @@ public class TransferRepositoryTest extends DatabaseTestFixture {
         assertThat(result)
                 .usingFieldByFieldElementComparator()
                 .containsExactly(transfer1, transfer2);
-    }
-
-    private void insertTransfer(Transfer transfer) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("" +
-                    "INSERT INTO money_transfer (\n" +
-                    "  id,\n" +
-                    "  from_account,\n" +
-                    "  to_account,\n" +
-                    "  amount,\n" +
-                    "  title,\n" +
-                    "  time\n" +
-                    ") VALUES (?, ?, ?, ?, ?, ?)")) {
-                statement.setString(1, transfer.getTransferId().toString());
-                statement.setString(2, transfer.getFrom().toString());
-                statement.setString(3, transfer.getTo().toString());
-                statement.setBigDecimal(4, transfer.getAmount());
-                statement.setString(5, transfer.getTitle());
-                statement.setTimestamp(6, Timestamp.from(Instant.ofEpochMilli(transfer.getTimestamp())));
-                statement.execute();
-            }
-        }
     }
 }

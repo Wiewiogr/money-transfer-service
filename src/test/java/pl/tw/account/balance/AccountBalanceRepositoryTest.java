@@ -14,6 +14,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static pl.tw.transfer.DepositRequest.DEPOSIT_UUID;
 
 public class AccountBalanceRepositoryTest {
 
@@ -125,11 +126,12 @@ public class AccountBalanceRepositoryTest {
         UUID second = UUID.randomUUID();
         UUID third = UUID.randomUUID();
 
+        Transfer deposit = new Transfer(UUID.randomUUID(), DEPOSIT_UUID, first, new BigDecimal("200.0"), "Title", 0l);
         Transfer transfer1 = new Transfer(UUID.randomUUID(), first, second, new BigDecimal("100.0"), "Title", 0l);
         Transfer transfer2 = new Transfer(UUID.randomUUID(), second, third, new BigDecimal("25.0"), "Title", 0l);
 
         TransferRepository transferRepository = mock(TransferRepository.class);
-        when(transferRepository.getAllTransfers()).thenReturn(Lists.newArrayList(transfer1, transfer2));
+        when(transferRepository.getAllTransfers()).thenReturn(Lists.newArrayList(deposit, transfer1, transfer2));
 
         // When
         accountBalanceRepository.recreateState(transferRepository);
@@ -139,7 +141,7 @@ public class AccountBalanceRepositoryTest {
         BigDecimal secondBalance = accountBalanceRepository.getBalance(second);
         BigDecimal thirdBalance = accountBalanceRepository.getBalance(third);
 
-        assertThat(firstBalance).isEqualTo(new BigDecimal("-100.0"));
+        assertThat(firstBalance).isEqualTo(new BigDecimal("100.0"));
         assertThat(secondBalance).isEqualTo(new BigDecimal("75.0"));
         assertThat(thirdBalance).isEqualTo(new BigDecimal("25.0"));
     }
